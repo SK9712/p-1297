@@ -1,0 +1,87 @@
+// Add these imports to your existing json-content.component.ts
+
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { TreeDialogService } from './tree-dialog.service';
+
+// Update your component class to include the dialog functionality
+export class JsonContentComponent implements OnInit, OnChanges {
+  // ... existing properties ...
+
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private treeDialogService: TreeDialogService // Add this
+  ) {}
+
+  // ... existing methods ...
+
+  /**
+   * Opens the tree view in a dialog
+   */
+  openTreeDialog(): void {
+    if (!this.hasData()) {
+      return;
+    }
+
+    const fileName = this.getFileName();
+    this.treeDialogService.openFileTreeDialog(
+      this._displayedData,
+      fileName,
+      {
+        maxDepth: 10,
+        showControls: true,
+        enableKeyboardNavigation: true
+      }
+    ).subscribe(result => {
+      if (result === 'confirmed') {
+        console.log('Tree dialog closed with confirmation');
+      }
+    });
+  }
+
+  /**
+   * Opens a compact tree view for quick preview
+   */
+  openQuickTreeView(): void {
+    if (!this.hasData()) {
+      return;
+    }
+
+    this.treeDialogService.openCompactTreeDialog(
+      this._displayedData,
+      'Quick Tree View'
+    ).subscribe();
+  }
+
+  /**
+   * Opens fullscreen tree view
+   */
+  openFullscreenTree(): void {
+    if (!this.hasData()) {
+      return;
+    }
+
+    const fileName = this.getFileName();
+    this.treeDialogService.openFullscreenTreeDialog(
+      this._displayedData,
+      `Fullscreen View - ${fileName}`
+    ).subscribe();
+  }
+
+  /**
+   * Opens tree view for a specific node/object
+   */
+  openTreeForNode(nodeData: any, nodePath: string): void {
+    this.treeDialogService.openSimpleTreeDialog(
+      nodeData,
+      `Tree View - ${nodePath}`
+    ).subscribe();
+  }
+
+  private getFileName(): string {
+    // You can adapt this based on how you store/access the filename
+    return 'JSON Data'; // or get from your file metadata
+  }
+
+  // ... rest of your existing methods ...
+}

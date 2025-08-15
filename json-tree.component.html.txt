@@ -1,0 +1,154 @@
+<div class="tree-container">
+  <!-- Header -->
+  <div class="tree-header">
+    <h3 class="tree-title">
+      <mat-icon class="header-icon">account_tree</mat-icon>
+      JSON Tree Structure
+    </h3>
+  </div>
+
+  <!-- Controls -->
+  <div class="tree-controls" *ngIf="showControls">
+    <button 
+      mat-stroked-button 
+      class="control-btn" 
+      (click)="expandAll()"
+      matTooltip="Expand all nodes">
+      <mat-icon>unfold_more</mat-icon>
+      Expand All
+    </button>
+    
+    <button 
+      mat-stroked-button 
+      class="control-btn" 
+      (click)="collapseAll()"
+      matTooltip="Collapse all nodes">
+      <mat-icon>unfold_less</mat-icon>
+      Collapse All
+    </button>
+    
+    <button 
+      mat-stroked-button 
+      class="control-btn" 
+      (click)="toggleSelected()"
+      [disabled]="!selectedNode || !selectedNode.isExpandable"
+      matTooltip="Toggle selected node">
+      <mat-icon>radio_button_checked</mat-icon>
+      Toggle Selected
+    </button>
+  </div>
+
+  <!-- Tree Content -->
+  <div class="tree-content">
+    <ng-container *ngIf="treeNodes.length > 0; else noData">
+      <div class="tree-nodes">
+        <ng-container *ngFor="let node of treeNodes; trackBy: trackByNode">
+          <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: node }"></ng-container>
+        </ng-container>
+      </div>
+    </ng-container>
+
+    <!-- No Data Template -->
+    <ng-template #noData>
+      <div class="no-data">
+        <mat-icon class="no-data-icon">data_object</mat-icon>
+        <h4>No Data Available</h4>
+        <p>Please provide JSON data to display the tree structure.</p>
+      </div>
+    </ng-template>
+
+    <!-- Recursive Node Template -->
+    <ng-template #nodeTemplate let-node>
+      <div 
+        class="tree-node" 
+        [class.root-level]="node.level === 0"
+        [style.margin-left.px]="node.level * 28"
+        [attr.data-path]="node.path"
+        [attr.data-level]="node.level">
+        
+        <!-- Node Content -->
+        <div 
+          class="tree-item"
+          [class.selected]="node.isSelected"
+          [class.expandable]="node.isExpandable"
+          (click)="selectNode(node)"
+          [attr.tabindex]="0"
+          [attr.role]="'treeitem'"
+          [attr.aria-expanded]="node.isExpandable ? node.isExpanded : null"
+          [attr.aria-level]="node.level + 1"
+          [attr.aria-selected]="node.isSelected">
+          
+          <!-- Expand/Collapse Toggle -->
+          <div 
+            class="tree-toggle"
+            [class.expanded]="node.isExpanded"
+            [class.leaf]="!node.isExpandable"
+            (click)="toggleNode(node, $event)"
+            [attr.aria-label]="node.isExpandable ? (node.isExpanded ? 'Collapse' : 'Expand') + ' ' + node.key : ''">
+            
+            <mat-icon 
+              *ngIf="node.isExpandable" 
+              class="toggle-icon"
+              [class.rotated]="node.isExpanded">
+              chevron_right
+            </mat-icon>
+          </div>
+
+          <!-- Type Icon -->
+          <div 
+            class="type-icon"
+            [class]="'type-' + node.type"
+            [matTooltip]="getTypeName(node)">
+            {{ getTypeIcon(node.type) }}
+          </div>
+
+          <!-- Node Key -->
+          <span class="node-key">{{ node.key }}</span>
+
+          <!-- Type Badge -->
+          <span class="node-type">{{ getTypeName(node) }}</span>
+
+          <!-- Value Preview -->
+          <span 
+            *ngIf="!node.isExpandable" 
+            class="node-value"
+            [class]="'value-' + node.type"
+            [matTooltip]="node.value">
+            {{ getValuePreview(node) }}
+          </span>
+
+          <!-- Path Info -->
+          <span class="node-path" [matTooltip]="'Full path: ' + node.path">
+            {{ node.path }}
+          </span>
+        </div>
+
+        <!-- Children Container -->
+        <div 
+          *ngIf="node.isExpandable && node.isExpanded && node.children" 
+          class="tree-children"
+          [@expandCollapse]
+          [attr.role]="'group'">
+          
+          <ng-container *ngFor="let childNode of node.children; trackBy: trackByNode">
+            <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: childNode }"></ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="tree-status" *ngIf="showControls">
+    <div class="status-info">
+      <mat-icon class="status-icon">info</mat-icon>
+      <span class="status-text">{{ getStatusText() }}</span>
+    </div>
+    
+    <div class="status-actions">
+      <span class="keyboard-hint" *ngIf="enableKeyboardNavigation">
+        Use arrow keys to navigate
+      </span>
+    </div>
+  </div>
+</div>

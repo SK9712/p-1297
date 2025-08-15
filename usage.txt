@@ -1,0 +1,53 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ExpandableTreeComponent } from './expandable-tree/expandable-tree.component';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ExpandableTreeComponent
+  ],
+  template: `
+    <div class="app-container">
+      <header class="app-header">
+        <h1>JSON File Viewer with Expandable Tree</h1>
+        <p>Interactive hierarchical data visualization</p>
+      </header>
+
+      <main class="app-main">
+        <div class="demo-section">
+          <h2>Sample JSON Data</h2>
+          <div class="json-examples">
+            <button 
+              class="example-btn"
+              [class.active]="selectedExample === 'user'"
+              (click)="loadExample('user')">
+              User Profile
+            </button>
+            <button 
+              class="example-btn"
+              [class.active]="selectedExample === 'config'"
+              (click)="loadExample('config')">
+              App Config
+            </button>
+            <button 
+              class="example-btn"
+              [class.active]="selectedExample === 'api'"
+              (click)="loadExample('api')">
+              API Response
+            </button>
+          </div>
+        </div>
+
+        <div class="tree-section">
+          <app-expandable-tree
+            [jsonData]="currentJsonData"
+            [maxDepth]="10"
+            [showControls]="true"
+            [enableKeyboardNavigation]="true">
+          </app-expandable-tree>
+        </div>
+      </main>
+    </div>

@@ -1,0 +1,24 @@
+// Add these styles to your global styles.scss or angular.json styles array
+
+// Tree Dialog Panel Styles
+.tree-dialog-panel {
+  .mat-mdc-dialog-container {
+    padding: 0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  .mat-mdc-dialog-surface {
+    border-radius: 12px;
+  }
+}
+
+// Compact Dialog Styles
+.tree-dialog-compact {
+  .mat-mdc-dialog-container {
+    padding: 0;
+    border-radius: 8px;
+  }
+}
+
+//

@@ -1,0 +1,149 @@
+import { Injectable } from '@angular/core';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { Observable } from 'rxjs';
+import { TreeDialogComponent, TreeDialogData } from './tree-dialog.component';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class TreeDialogService {
+  constructor(private dialog: MatDialog) {}
+
+  /**
+   * Opens the tree dialog with the provided JSON data
+   */
+  openTreeDialog(data: TreeDialogData): MatDialogRef<TreeDialogComponent> {
+    return this.dialog.open(TreeDialogComponent, {
+      data,
+      width: '80vw',
+      height: '80vh',
+      maxWidth: '1200px',
+      maxHeight: '90vh',
+      minWidth: '600px',
+      minHeight: '500px',
+      panelClass: 'tree-dialog-panel',
+      autoFocus: false, // Prevent auto-focus to allow tree component to handle focus
+      restoreFocus: true,
+      closeOnNavigation: true,
+      disableClose: false // Allow closing with escape key
+    });
+  }
+
+  /**
+   * Opens a simple tree dialog with just JSON data
+   */
+  openSimpleTreeDialog(jsonData: any, title?: string): Observable<any> {
+    const dialogRef = this.openTreeDialog({
+      title: title || 'JSON Data Viewer',
+      jsonData,
+      showControls: true,
+      enableKeyboardNavigation: true,
+      allowCopy: true
+    });
+
+    return dialogRef.afterClosed();
+  }
+
+  /**
+   * Opens a tree dialog for file content viewing
+   */
+  openFileTreeDialog(
+    jsonData: any, 
+    fileName: string, 
+    options?: Partial<TreeDialogData>
+  ): Observable<any> {
+    const dialogRef = this.openTreeDialog({
+      title: `File Viewer - ${fileName}`,
+      fileName,
+      jsonData,
+      maxDepth: 10,
+      showControls: true,
+      enableKeyboardNavigation: true,
+      allowCopy: true,
+      ...options
+    });
+
+    return dialogRef.afterClosed();
+  }
+
+  /**
+   * Opens a compact tree dialog (smaller size)
+   */
+  openCompactTreeDialog(jsonData: any, title?: string): Observable<any> {
+    const dialogRef = this.dialog.open(TreeDialogComponent, {
+      data: {
+        title: title || 'Quick View',
+        jsonData,
+        showControls: false,
+        enableKeyboardNavigation: true,
+        allowCopy: false
+      },
+      width: '60vw',
+      height: '60vh',
+      maxWidth: '800px',
+      maxHeight: '70vh',
+      minWidth: '400px',
+      minHeight: '300px',
+      panelClass: 'tree-dialog-compact',
+      autoFocus: false
+    });
+
+    return dialogRef.afterClosed();
+  }
+
+  /**
+   * Opens a fullscreen tree dialog
+   */
+  openFullscreenTreeDialog(jsonData: any, title?: string): Observable<any> {
+    const dialogRef = this.dialog.open(TreeDialogComponent, {
+      data: {
+        title: title || 'JSON Tree Viewer',
+        jsonData,
+        maxDepth: 15,
+        showControls: true,
+        enableKeyboardNavigation: true,
+        allowCopy: true
+      },
+      width: '100vw',
+      height: '100vh',
+      maxWidth: '100vw',
+      maxHeight: '100vh',
+      panelClass: 'tree-dialog-fullscreen',
+      autoFocus: false,
+      hasBackdrop: false
+    });
+
+    return dialogRef.afterClosed();
+  }
+
+  /**
+   * Opens tree dialog with custom configuration
+   */
+  openCustomTreeDialog(
+    config: TreeDialogData & {
+      width?: string;
+      height?: string;
+      maxWidth?: string;
+      maxHeight?: string;
+      minWidth?: string;
+      minHeight?: string;
+      panelClass?: string;
+    }
+  ): Observable<any> {
+    const { width, height, maxWidth, maxHeight, minWidth, minHeight, panelClass, ...data } = config;
+    
+    const dialogRef = this.dialog.open(TreeDialogComponent, {
+      data,
+      width: width || '80vw',
+      height: height || '80vh',
+      maxWidth: maxWidth || '1200px',
+      maxHeight: maxHeight || '90vh',
+      minWidth: minWidth || '600px',
+      minHeight: minHeight || '500px',
+      panelClass: panelClass || 'tree-dialog-panel',
+      autoFocus: false
+    });
+
+    return dialogRef.afterClosed();
+  }
+}

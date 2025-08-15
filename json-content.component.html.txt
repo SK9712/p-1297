@@ -1,0 +1,240 @@
+<!-- Add this to your existing json-content.component.html -->
+
+<div class="json-content-wrapper">
+  <!-- Header Controls Section (Updated) -->
+  <div class="table-controls" *ngIf="enableSearch || enableExport">
+    <div class="controls-left">
+      <!-- Existing search input -->
+      <mat-form-field class="search-input" appearance="outline" *ngIf="enableSearch">
+        <mat-label>Search in table</mat-label>
+        <input matInput 
+               [(ngModel)]="searchQuery" 
+               (input)="onSearch()" 
+               placeholder="Type to filter records..."
+               autocomplete="off">
+        <mat-icon matSuffix class="search-icon">search</mat-icon>
+        <button mat-icon-button 
+                matSuffix 
+                *ngIf="searchQuery" 
+                (click)="clearSearch()" 
+                matTooltip="Clear search">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+    
+    <div class="controls-right">
+      <!-- Record Counter -->
+      <div class="record-counter">
+        <mat-icon class="counter-icon">table_rows</mat-icon>
+        <span class="counter-text">
+          <strong>{{ filteredRecords }}</strong>
+          <span *ngIf="filteredRecords !== totalRecords"> of {{ totalRecords }}</span>
+          records
+        </span>
+      </div>
+      
+      <!-- NEW: Tree View Options -->
+      <div class="tree-view-controls">
+        <!-- Quick Tree View Button -->
+        <button mat-stroked-button 
+                color="primary"
+                (click)="openQuickTreeView()"
+                [disabled]="!hasData()"
+                matTooltip="Open quick tree view">
+          <mat-icon>account_tree</mat-icon>
+          Quick Tree
+        </button>
+
+        <!-- Tree View Menu -->
+        <button mat-button 
+                [matMenuTriggerFor]="treeMenu"
+                [disabled]="!hasData()"
+                matTooltip="Tree view options">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+        <mat-menu #treeMenu="matMenu">
+          <button mat-menu-item (click)="openTreeDialog()">
+            <mat-icon>open_in_new</mat-icon>
+            <span>Open Tree Dialog</span>
+          </button>
+          
+          <button mat-menu-item (click)="openFullscreenTree()">
+            <mat-icon>fullscreen</mat-icon>
+            <span>Fullscreen Tree View</span>
+          </button>
+          
+          <mat-divider></mat-divider>
+          
+          <button mat-menu-item (click)="exportToCSV()" [disabled]="!hasData()">
+            <mat-icon>file_download</mat-icon>
+            <span>Export to CSV</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <mat-spinner diameter="48" color="primary"></mat-spinner>
+    <p class="loading-message">Processing JSON data...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && !hasData()">
+    <mat-icon class="empty-icon">table_chart</mat-icon>
+    <h2 class="empty-title">No Data Available</h2>
+    <p class="empty-description">
+      Please provide JSON data to display in the table.
+    </p>
+  </div>
+
+  <!-- Main Data Table -->
+  <div class="table-container" *ngIf="!isLoading && hasData()">
+    <table mat-table 
+           [dataSource]="dataSource" 
+           matSort 
+           class="data-table">
+      
+      <!-- Dynamic Column Generation -->
+      <ng-container *ngFor="let column of columns; trackBy: trackByColumn" 
+                    [matColumnDef]="column.key">
+        
+        <!-- Header Cell -->
+        <th mat-header-cell 
+            *matHeaderCellDef 
+            [mat-sort-header]="column.sortable ? column.key : ''"
+            [disabled]="!column.sortable"
+            class="header-cell"
+            [ngClass]="'header-' + column.type"
+            [style.width]="column.width">
+          
+          <div class="header-content">
+            <div class="header-main">
+              <mat-icon class="type-indicator">
+                {{ getTypeIcon(column.type) }}
+              </mat-icon>
+              <span class="column-title">{{ column.label }}</span>
+            </div>
+            <div class="header-stats" *ngIf="showSchemaPanel">
+              <small class="stats-text">{{ getColumnStats(column) }}</small>
+            </div>
+          </div>
+        </th>
+        
+        <!-- Data Cells -->
+        <td mat-cell 
+            *matCellDef="let row" 
+            [ngClass]="getCellClass(column)"
+            [style.width]="column.width"
+            (click)="onCellClick(row, column)">
+          
+          <!-- String Type Display -->
+          <span *ngIf="column.type === 'string'" 
+                class="cell-content text-content">
+            {{ formatCellValue(row, column) }}
+          </span>
+          
+          <!-- Number Type Display -->
+          <span *ngIf="column.type === 'number'" 
+                class="cell-content number-content">
+            {{ formatCellValue(row, column) }}
+          </span>
+          
+          <!-- Boolean Type Display -->
+          <div *ngIf="column.type === 'boolean'" 
+               class="cell-content boolean-content">
+            <mat-icon [ngClass]="getBooleanClass(getBooleanValue(row, column))">
+              {{ getBooleanIcon(getBooleanValue(row, column)) }}
+            </mat-icon>
+            <span class="boolean-text">{{ formatCellValue(row, column) }}</span>
+          </div>
+          
+          <!-- Date Type Display -->
+          <span *ngIf="column.type === 'date'" 
+                class="cell-content date-content">
+            {{ formatCellValue(row, column) }}
+          </span>
+          
+          <!-- Array Type Display -->
+          <div *ngIf="column.type === 'array'" 
+               class="cell-content array-content">
+            <div class="array-chip"
+                 [matTooltip]="'Array with ' + getArrayLength(row, column) + ' items'">
+              <mat-icon class="array-icon">view_list</mat-icon>
+              <span class="array-text">{{ formatCellValue(row, column) }}</span>
+              <!-- NEW: Quick tree view for array -->
+              <button mat-icon-button 
+                      class="quick-tree-btn"
+                      (click)="openTreeForNode(getNestedValue(row, column.key), column.key)"
+                      matTooltip="View in tree"
+                      (click)="$event.stopPropagation()">
+                <mat-icon>account_tree</mat-icon>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Object Type Display -->
+          <div *ngIf="column.type === 'object'" 
+               class="cell-content object-content">
+            <button mat-stroked-button 
+                    class="object-button"
+                    [disabled]="!hasObjectData(row, column)"
+                    [matTooltip]="hasObjectData(row, column) ? 'Click to view object details' : 'No object data'"
+                    (click)="openTreeForNode(getNestedValue(row, column.key), column.key)">
+              <mat-icon>data_object</mat-icon>
+              <span>{{ formatCellValue(row, column) }}</span>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Table Structure -->
+      <tr mat-header-row 
+          *matHeaderRowDef="displayedColumns; sticky: true" 
+          class="table-header-row"></tr>
+      <tr mat-row 
+          *matRowDef="let row; columns: displayedColumns;" 
+          class="table-data-row"></tr>
+    </table>
+  </div>
+
+  <!-- Rest of your existing template... -->
+  <!-- Pagination, Schema Panel, Footer etc. -->
+</div>
+
+<!-- Add these styles to your SCSS file -->
+<style>
+.tree-view-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.quick-tree-btn {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  margin-left: 8px;
+}
+
+.quick-tree-btn .mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.array-chip {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .tree-view-controls {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+</style>

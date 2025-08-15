@@ -1,0 +1,363 @@
+import { Component, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+export interface TreeNode {
+  key: string;
+  value: any;
+  type: 'object' | 'array' | 'string' | 'number' | 'boolean' | 'null';
+  path: string;
+  level: number;
+  isExpandable: boolean;
+  isExpanded: boolean;
+  isSelected: boolean;
+  children?: TreeNode[];
+  parent?: TreeNode;
+}
+
+@Component({
+  selector: 'app-expandable-tree',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatButtonModule,
+    MatTooltipModule
+  ],
+  templateUrl: './expandable-tree.component.html',
+  styleUrls: ['./expandable-tree.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class JsonTreeComponent implements OnInit, OnChanges {
+  @Input() jsonData: any;
+  @Input() maxDepth: number = 10;
+  @Input() showControls: boolean = true;
+  @Input() enableKeyboardNavigation: boolean = true;
+
+  treeNodes: TreeNode[] = [];
+  selectedNode: TreeNode | null = null;
+  expandedCount: number = 0;
+  totalExpandableCount: number = 0;
+  statusMessage: string = 'Ready';
+
+  constructor(private cdr: ChangeDetectorRef) {}
+
+  ngOnInit(): void {
+    if (this.enableKeyboardNavigation) {
+      this.setupKeyboardNavigation();
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['jsonData'] && this.jsonData) {
+      this.buildTree();
+      this.updateStats();
+    }
+  }
+
+  private buildTree(): void {
+    this.treeNodes = [];
+    this.selectedNode = null;
+    
+    if (this.jsonData && typeof this.jsonData === 'object') {
+      if (Array.isArray(this.jsonData)) {
+        this.jsonData.forEach((item, index) => {
+          const node = this.createNode(`[${index}]`, item, `[${index}]`, 0);
+          this.treeNodes.push(node);
+        });
+      } else {
+        Object.keys(this.jsonData).forEach(key => {
+          const node = this.createNode(key, this.jsonData[key], key, 0);
+          this.treeNodes.push(node);
+        });
+      }
+    }
+  }
+
+  private createNode(key: string, value: any, path: string, level: number, parent?: TreeNode): TreeNode {
+    const type = this.getValueType(value);
+    const isExpandable = this.isExpandableValue(value) && level < this.maxDepth;
+    
+    const node: TreeNode = {
+      key,
+      value,
+      type,
+      path,
+      level,
+      isExpandable,
+      isExpanded: false,
+      isSelected: false,
+      parent,
+      children: []
+    };
+
+    if (isExpandable) {
+      this.totalExpandableCount++;
+      
+      if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          const childPath = `${path}[${index}]`;
+          const childNode = this.createNode(`[${index}]`, item, childPath, level + 1, node);
+          node.children!.push(childNode);
+        });
+      } else if (typeof value === 'object' && value !== null) {
+        Object.keys(value).forEach(childKey => {
+          const childPath = path ? `${path}.${childKey}` : childKey;
+          const childNode = this.createNode(childKey, value[childKey], childPath, level + 1, node);
+          node.children!.push(childNode);
+        });
+      }
+    }
+
+    return node;
+  }
+
+  private getValueType(value: any): TreeNode['type'] {
+    if (value === null || value === undefined) return 'null';
+    if (Array.isArray(value)) return 'array';
+    if (typeof value === 'boolean') return 'boolean';
+    if (typeof value === 'number') return 'number';
+    if (typeof value === 'string') return 'string';
+    if (typeof value === 'object') return 'object';
+    return 'string';
+  }
+
+  private isExpandableValue(value: any): boolean {
+    if (value === null || value === undefined) return false;
+    if (Array.isArray(value)) return value.length > 0;
+    if (typeof value === 'object') return Object.keys(value).length > 0;
+    return false;
+  }
+
+  getTypeIcon(type: TreeNode['type']): string {
+    const icons = {
+      object: 'O',
+      array: 'A',
+      string: 'S',
+      number: 'N',
+      boolean: 'B',
+      null: '∅'
+    };
+    return icons[type] || '?';
+  }
+
+  getTypeName(node: TreeNode): string {
+    if (node.type === 'array') {
+      return `Array[${Array.isArray(node.value) ? node.value.length : 0}]`;
+    }
+    return node.type.charAt(0).toUpperCase() + node.type.slice(1);
+  }
+
+  getValuePreview(node: TreeNode): string {
+    if (node.isExpandable) return '';
+    
+    let value = String(node.value);
+    if (node.type === 'string') {
+      value = `"${value}"`;
+    }
+    
+    return value.length > 50 ? value.substring(0, 50) + '...' : value;
+  }
+
+  toggleNode(node: TreeNode, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    
+    if (!node.isExpandable) return;
+    
+    node.isExpanded = !node.isExpanded;
+    this.updateStats();
+    this.updateStatus(`${node.isExpanded ? 'Expanded' : 'Collapsed'}: ${node.key}`);
+    this.cdr.markForCheck();
+  }
+
+  selectNode(node: TreeNode): void {
+    // Clear previous selection
+    if (this.selectedNode) {
+      this.selectedNode.isSelected = false;
+    }
+    
+    // Set new selection
+    node.isSelected = true;
+    this.selectedNode = node;
+    this.updateStatus(`Selected: ${node.path}`);
+    this.cdr.markForCheck();
+  }
+
+  expandAll(): void {
+    this.traverseNodes(this.treeNodes, (node) => {
+      if (node.isExpandable) {
+        node.isExpanded = true;
+      }
+    });
+    this.updateStats();
+    this.updateStatus('All nodes expanded');
+    this.cdr.markForCheck();
+  }
+
+  collapseAll(): void {
+    this.traverseNodes(this.treeNodes, (node) => {
+      if (node.isExpandable) {
+        node.isExpanded = false;
+      }
+    });
+    this.updateStats();
+    this.updateStatus('All nodes collapsed');
+    this.cdr.markForCheck();
+  }
+
+  toggleSelected(): void {
+    if (this.selectedNode && this.selectedNode.isExpandable) {
+      this.toggleNode(this.selectedNode);
+    } else {
+      this.updateStatus('No expandable node selected');
+    }
+  }
+
+  private traverseNodes(nodes: TreeNode[], callback: (node: TreeNode) => void): void {
+    nodes.forEach(node => {
+      callback(node);
+      if (node.children && node.children.length > 0) {
+        this.traverseNodes(node.children, callback);
+      }
+    });
+  }
+
+  private updateStats(): void {
+    this.expandedCount = 0;
+    this.totalExpandableCount = 0;
+    
+    this.traverseNodes(this.treeNodes, (node) => {
+      if (node.isExpandable) {
+        this.totalExpandableCount++;
+        if (node.isExpanded) {
+          this.expandedCount++;
+        }
+      }
+    });
+  }
+
+  private updateStatus(message: string = 'Ready'): void {
+    this.statusMessage = message;
+  }
+
+  getStatusText(): string {
+    return `${this.expandedCount}/${this.totalExpandableCount} nodes expanded • ${this.statusMessage}`;
+  }
+
+  // Keyboard navigation
+  private setupKeyboardNavigation(): void {
+    document.addEventListener('keydown', (event) => this.handleKeyDown(event));
+  }
+
+  private handleKeyDown(event: KeyboardEvent): void {
+    if (!this.selectedNode) return;
+    
+    switch (event.key) {
+      case 'ArrowRight':
+        if (this.selectedNode.isExpandable && !this.selectedNode.isExpanded) {
+          this.toggleNode(this.selectedNode);
+        }
+        break;
+        
+      case 'ArrowLeft':
+        if (this.selectedNode.isExpandable && this.selectedNode.isExpanded) {
+          this.toggleNode(this.selectedNode);
+        }
+        break;
+        
+      case 'ArrowDown':
+        this.selectNextNode();
+        break;
+        
+      case 'ArrowUp':
+        this.selectPreviousNode();
+        break;
+        
+      case 'Enter':
+      case ' ':
+        if (this.selectedNode.isExpandable) {
+          this.toggleNode(this.selectedNode);
+        }
+        event.preventDefault();
+        break;
+    }
+  }
+
+  private selectNextNode(): void {
+    const allVisibleNodes = this.getAllVisibleNodes();
+    const currentIndex = allVisibleNodes.findIndex(node => node.isSelected);
+    
+    if (currentIndex < allVisibleNodes.length - 1) {
+      this.selectNode(allVisibleNodes[currentIndex + 1]);
+    }
+  }
+
+  private selectPreviousNode(): void {
+    const allVisibleNodes = this.getAllVisibleNodes();
+    const currentIndex = allVisibleNodes.findIndex(node => node.isSelected);
+    
+    if (currentIndex > 0) {
+      this.selectNode(allVisibleNodes[currentIndex - 1]);
+    }
+  }
+
+  private getAllVisibleNodes(): TreeNode[] {
+    const visibleNodes: TreeNode[] = [];
+    
+    const traverse = (nodes: TreeNode[]) => {
+      nodes.forEach(node => {
+        visibleNodes.push(node);
+        if (node.isExpanded && node.children) {
+          traverse(node.children);
+        }
+      });
+    };
+    
+    traverse(this.treeNodes);
+    return visibleNodes;
+  }
+
+  // Track by function for *ngFor performance
+  trackByNode(index: number, node: TreeNode): string {
+    return node.path;
+  }
+
+  // Public method to get node by path
+  getNodeByPath(path: string): TreeNode | null {
+    let foundNode: TreeNode | null = null;
+    
+    this.traverseNodes(this.treeNodes, (node) => {
+      if (node.path === path) {
+        foundNode = node;
+      }
+    });
+    
+    return foundNode;
+  }
+
+  // Public method to expand to a specific path
+  expandToPath(path: string): void {
+    const pathParts = path.split(/[\.\[\]]/).filter(part => part !== '');
+    let currentPath = '';
+    
+    pathParts.forEach((part, index) => {
+      if (index === 0) {
+        currentPath = part;
+      } else {
+        currentPath += pathParts[index - 1].match(/^\d+$/) ? `[${part}]` : `.${part}`;
+      }
+      
+      const node = this.getNodeByPath(currentPath);
+      if (node && node.isExpandable) {
+        node.isExpanded = true;
+      }
+    });
+    
+    this.updateStats();
+    this.cdr.markForCheck();
+  }
+}
