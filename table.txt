@@ -824,7 +824,6 @@ export class JsonContentComponent implements OnInit, OnChanges {
   }
 }
 
-
 <div class="json-content-wrapper">
   <!-- Header Controls Section -->
   <div class="table-controls" *ngIf="enableSearch || enableExport">
@@ -862,7 +861,9 @@ export class JsonContentComponent implements OnInit, OnChanges {
       <!-- Array Display Mode -->
       <mat-form-field appearance="outline" class="array-mode-select">
         <mat-label>Array Display</mat-label>
-        <select matNativeControl [(ngModel)]="arrayDisplayMode" (change)="changeArrayDisplayMode(arrayDisplayMode)">
+        <select matNativeControl 
+                [(ngModel)]="arrayDisplayMode" 
+                (change)="changeArrayDisplayMode(arrayDisplayMode)">
           <option value="preview">Preview</option>
           <option value="count">Count Only</option>
           <option value="expanded">Expanded</option>
@@ -1428,11 +1429,6 @@ $font-weight-bold: 700;
   padding: $padding;
 }
 
-@mixin nested-indent($level: 1) {
-  padding-left: #{$spacing-lg * $level};
-  border-left: 2px solid rgba($primary-blue, 0.2);
-}
-
 // ==========================================
 // MAIN COMPONENT WRAPPER
 // ==========================================
@@ -1459,10 +1455,13 @@ $font-weight-bold: 700;
     gap: $spacing-xl;
     flex-wrap: wrap;
 
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
       flex-direction: column;
       align-items: stretch;
       gap: $spacing-lg;
+    }
+
+    @media (max-width: 768px) {
       padding: $spacing-lg;
     }
 
@@ -1501,7 +1500,7 @@ $font-weight-bold: 700;
     }
 
     // ==========================================
-    // NEW VIEW CONTROLS
+    // VIEW CONTROLS
     // ==========================================
 
     .view-controls {
@@ -1512,10 +1511,15 @@ $font-weight-bold: 700;
       @media (max-width: 768px) {
         width: 100%;
         justify-content: space-between;
+        gap: $spacing-sm;
       }
 
       .array-mode-select {
         min-width: 140px;
+
+        @media (max-width: 768px) {
+          min-width: 120px;
+        }
 
         ::ng-deep {
           .mat-mdc-form-field-wrapper {
@@ -1525,6 +1529,10 @@ $font-weight-bold: 700;
           .mat-mdc-form-field-flex {
             background-color: $white;
             border-radius: $radius-md;
+          }
+
+          .mat-mdc-form-field-outline {
+            color: $border-medium;
           }
         }
       }
@@ -1538,6 +1546,11 @@ $font-weight-bold: 700;
         .mat-icon {
           font-size: 18px;
         }
+
+        @media (max-width: 768px) {
+          font-size: $font-size-xs;
+          padding: $spacing-xs $spacing-sm;
+        }
       }
     }
 
@@ -1548,6 +1561,7 @@ $font-weight-bold: 700;
       @media (max-width: 768px) {
         justify-content: space-between;
         width: 100%;
+        gap: $spacing-md;
       }
 
       .record-counter {
@@ -1563,6 +1577,10 @@ $font-weight-bold: 700;
         .counter-text {
           font-size: $font-size-md;
           font-weight: $font-weight-medium;
+
+          @media (max-width: 768px) {
+            font-size: $font-size-sm;
+          }
 
           strong {
             color: $text-primary;
@@ -1583,11 +1601,20 @@ $font-weight-bold: 700;
     padding: $spacing-3xl * 2;
     gap: $spacing-2xl;
 
+    @media (max-width: 768px) {
+      padding: $spacing-3xl;
+    }
+
     .loading-message {
       color: $text-secondary;
       font-size: $font-size-lg;
       font-weight: $font-weight-medium;
       margin: 0;
+      text-align: center;
+
+      @media (max-width: 768px) {
+        font-size: $font-size-md;
+      }
     }
   }
 
@@ -1601,12 +1628,22 @@ $font-weight-bold: 700;
     padding: $spacing-3xl * 2;
     text-align: center;
 
+    @media (max-width: 768px) {
+      padding: $spacing-3xl;
+    }
+
     .empty-icon {
       font-size: 72px;
       width: 72px;
       height: 72px;
       color: $gray-300;
       margin-bottom: $spacing-2xl;
+
+      @media (max-width: 768px) {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+      }
     }
 
     .empty-title {
@@ -1614,6 +1651,10 @@ $font-weight-bold: 700;
       font-weight: $font-weight-semibold;
       color: $text-primary;
       margin: 0 0 $spacing-md 0;
+
+      @media (max-width: 768px) {
+        font-size: $font-size-xl;
+      }
     }
 
     .empty-description {
@@ -1622,6 +1663,11 @@ $font-weight-bold: 700;
       margin: 0;
       max-width: 400px;
       line-height: 1.5;
+
+      @media (max-width: 768px) {
+        font-size: $font-size-md;
+        max-width: 280px;
+      }
     }
   }
 
@@ -1633,6 +1679,10 @@ $font-weight-bold: 700;
     overflow: auto;
     max-height: 70vh;
     border-bottom: 1px solid $border-light;
+
+    @media (max-width: 768px) {
+      max-height: 60vh;
+    }
 
     // Custom scrollbar
     scrollbar-width: thin;
@@ -1678,6 +1728,11 @@ $font-weight-bold: 700;
           position: relative;
           background: inherit;
 
+          @media (max-width: 768px) {
+            padding: $spacing-md $spacing-sm;
+            font-size: $font-size-sm;
+          }
+
           .header-content {
             display: flex;
             flex-direction: column;
@@ -1686,11 +1741,16 @@ $font-weight-bold: 700;
             .header-main {
               @include flex-start;
               gap: $spacing-sm;
+              flex-wrap: wrap;
 
               .type-indicator {
                 font-size: 16px;
                 opacity: 0.7;
                 @include smooth-transition(opacity);
+
+                @media (max-width: 768px) {
+                  font-size: 14px;
+                }
 
                 &:hover {
                   opacity: 1;
@@ -1701,16 +1761,21 @@ $font-weight-bold: 700;
                 @include text-truncate;
                 flex: 1;
                 font-weight: $font-weight-semibold;
-              }
+                min-width: 0;
 
-              // ==========================================
-              // NEW NESTED INDICATORS
-              // ==========================================
+                @media (max-width: 768px) {
+                  font-size: $font-size-sm;
+                }
+              }
 
               .nested-indicator {
                 font-size: 14px;
                 color: $nested-purple;
                 opacity: 0.8;
+
+                @media (max-width: 768px) {
+                  font-size: 12px;
+                }
               }
 
               .depth-chip {
@@ -1719,10 +1784,20 @@ $font-weight-bold: 700;
                 font-size: $font-size-xs;
                 height: 20px;
                 font-weight: $font-weight-medium;
-                
+
+                @media (max-width: 768px) {
+                  height: 18px;
+                  font-size: 9px;
+                }
+
                 ::ng-deep .mat-mdc-chip-label {
                   font-size: $font-size-xs;
                   padding: 0 $spacing-xs;
+
+                  @media (max-width: 768px) {
+                    font-size: 9px;
+                    padding: 0 $spacing-xs/2;
+                  }
                 }
               }
             }
@@ -1732,6 +1807,10 @@ $font-weight-bold: 700;
                 font-size: $font-size-xs;
                 color: $text-hint;
                 font-weight: $font-weight-normal;
+
+                @media (max-width: 768px) {
+                  font-size: 9px;
+                }
               }
             }
           }
@@ -1762,10 +1841,6 @@ $font-weight-bold: 700;
           background-color: rgba($gray-50, 0.5);
         }
 
-        // ==========================================
-        // EXPANDED ROW STYLES
-        // ==========================================
-
         &.expanded-row {
           background-color: $background-expanded;
           
@@ -1784,6 +1859,10 @@ $font-weight-bold: 700;
           @include smooth-transition(all);
           vertical-align: top;
 
+          @media (max-width: 768px) {
+            padding: $spacing-sm $spacing-xs;
+          }
+
           .cell-content {
             display: flex;
             align-items: flex-start;
@@ -1798,6 +1877,11 @@ $font-weight-bold: 700;
               @include text-truncate;
               color: $text-primary;
               width: 100%;
+              font-size: $font-size-sm;
+
+              @media (max-width: 768px) {
+                font-size: $font-size-xs;
+              }
             }
           }
 
@@ -1809,6 +1893,11 @@ $font-weight-bold: 700;
               text-align: right;
               font-variant-numeric: tabular-nums;
               width: 100%;
+              font-size: $font-size-sm;
+
+              @media (max-width: 768px) {
+                font-size: $font-size-xs;
+              }
             }
           }
 
@@ -1823,6 +1912,12 @@ $font-weight-bold: 700;
                 width: 20px;
                 height: 20px;
 
+                @media (max-width: 768px) {
+                  font-size: 16px;
+                  width: 16px;
+                  height: 16px;
+                }
+
                 &.boolean-true {
                   color: $success-green;
                 }
@@ -1835,6 +1930,10 @@ $font-weight-bold: 700;
               .boolean-text {
                 font-size: $font-size-sm;
                 font-weight: $font-weight-medium;
+
+                @media (max-width: 768px) {
+                  font-size: $font-size-xs;
+                }
               }
             }
           }
@@ -1846,11 +1945,15 @@ $font-weight-bold: 700;
               font-size: $font-size-sm;
               color: #9c27b0;
               font-weight: $font-weight-medium;
+
+              @media (max-width: 768px) {
+                font-size: $font-size-xs;
+              }
             }
           }
 
           // ==========================================
-          // ENHANCED ARRAY CELLS
+          // ARRAY CELLS
           // ==========================================
 
           &.cell--array {
@@ -1870,10 +1973,21 @@ $font-weight-bold: 700;
                     height: 24px;
                     max-width: 120px;
 
+                    @media (max-width: 768px) {
+                      height: 20px;
+                      max-width: 80px;
+                      font-size: 9px;
+                    }
+
                     ::ng-deep .mat-mdc-chip-label {
                       @include text-truncate;
                       font-size: $font-size-xs;
                       padding: 0 $spacing-xs;
+
+                      @media (max-width: 768px) {
+                        font-size: 9px;
+                        padding: 0 $spacing-xs/2;
+                      }
                     }
                   }
 
@@ -1883,9 +1997,19 @@ $font-weight-bold: 700;
                     font-size: $font-size-xs;
                     height: 24px;
 
+                    @media (max-width: 768px) {
+                      height: 20px;
+                      font-size: 9px;
+                    }
+
                     ::ng-deep .mat-mdc-chip-label {
                       font-size: $font-size-xs;
                       padding: 0 $spacing-xs;
+
+                      @media (max-width: 768px) {
+                        font-size: 9px;
+                        padding: 0 $spacing-xs/2;
+                      }
                     }
                   }
                 }
@@ -1897,12 +2021,20 @@ $font-weight-bold: 700;
                   .array-icon {
                     font-size: 18px;
                     color: $array-teal;
+
+                    @media (max-width: 768px) {
+                      font-size: 16px;
+                    }
                   }
 
                   .array-text {
                     font-size: $font-size-sm;
                     font-weight: $font-weight-medium;
                     color: $array-teal;
+
+                    @media (max-width: 768px) {
+                      font-size: $font-size-xs;
+                    }
                   }
                 }
 
@@ -1918,8 +2050,17 @@ $font-weight-bold: 700;
                     @include smooth-transition(all);
                     @include hover-lift;
 
+                    @media (max-width: 768px) {
+                      font-size: $font-size-xs;
+                      padding: $spacing-xs;
+                    }
+
                     .mat-icon {
                       font-size: 16px;
+
+                      @media (max-width: 768px) {
+                        font-size: 14px;
+                      }
                     }
 
                     &:hover {
@@ -1936,6 +2077,11 @@ $font-weight-bold: 700;
                 border: 1px solid rgba($array-teal, 0.2);
                 max-height: 200px;
                 overflow-y: auto;
+
+                @media (max-width: 768px) {
+                  padding: $spacing-sm;
+                  max-height: 150px;
+                }
 
                 .array-items {
                   .array-item {
@@ -1954,6 +2100,11 @@ $font-weight-bold: 700;
                       color: $text-secondary;
                       font-weight: $font-weight-medium;
                       min-width: 32px;
+
+                      @media (max-width: 768px) {
+                        font-size: 9px;
+                        min-width: 24px;
+                      }
                     }
 
                     .item-value {
@@ -1961,6 +2112,10 @@ $font-weight-bold: 700;
                       font-size: $font-size-sm;
                       @include text-truncate;
                       font-family: 'Roboto Mono', monospace;
+
+                      @media (max-width: 768px) {
+                        font-size: $font-size-xs;
+                      }
                     }
                   }
                 }
@@ -1984,10 +2139,22 @@ $font-weight-bold: 700;
                 @include smooth-transition(all);
                 @include hover-lift;
 
+                @media (max-width: 768px) {
+                  font-size: $font-size-xs;
+                  min-height: 28px;
+                  padding: $spacing-xs/2 $spacing-xs;
+                }
+
                 .mat-icon {
                   font-size: 16px;
                   width: 16px;
                   height: 16px;
+
+                  @media (max-width: 768px) {
+                    font-size: 14px;
+                    width: 14px;
+                    height: 14px;
+                  }
                 }
 
                 &:hover:not([disabled]) {
@@ -2005,7 +2172,7 @@ $font-weight-bold: 700;
           }
 
           // ==========================================
-          // NEW NESTED CELLS
+          // NESTED CELLS
           // ==========================================
 
           &.cell--nested {
@@ -2025,8 +2192,17 @@ $font-weight-bold: 700;
                   @include smooth-transition(all);
                   @include hover-lift;
 
+                  @media (max-width: 768px) {
+                    font-size: $font-size-xs;
+                    padding: $spacing-xs/2 $spacing-xs;
+                  }
+
                   .mat-icon {
                     font-size: 16px;
+
+                    @media (max-width: 768px) {
+                      font-size: 14px;
+                    }
                   }
 
                   .nested-icon {
@@ -2054,15 +2230,27 @@ $font-weight-bold: 700;
                       padding: $spacing-md;
                       background-color: rgba($nested-purple, 0.05);
 
+                      @media (max-width: 768px) {
+                        padding: $spacing-sm;
+                      }
+
                       .mat-mdc-card-title {
                         font-size: $font-size-md;
                         font-weight: $font-weight-semibold;
                         color: $nested-purple;
+
+                        @media (max-width: 768px) {
+                          font-size: $font-size-sm;
+                        }
                       }
                     }
 
                     .mat-mdc-card-content {
                       padding: $spacing-md;
+
+                      @media (max-width: 768px) {
+                        padding: $spacing-sm;
+                      }
                     }
                   }
 
@@ -2082,6 +2270,11 @@ $font-weight-bold: 700;
                         color: $text-primary;
                         min-width: 80px;
                         font-size: $font-size-sm;
+
+                        @media (max-width: 768px) {
+                          font-size: $font-size-xs;
+                          min-width: 60px;
+                        }
                       }
 
                       .property-value {
@@ -2090,6 +2283,10 @@ $font-weight-bold: 700;
                         font-size: $font-size-sm;
                         color: $text-secondary;
                         word-break: break-all;
+
+                        @media (max-width: 768px) {
+                          font-size: $font-size-xs;
+                        }
                       }
                     }
                   }
@@ -2113,17 +2310,32 @@ $font-weight-bold: 700;
     ::ng-deep {
       .mat-mdc-paginator-container {
         padding: $spacing-lg $spacing-2xl;
+
+        @media (max-width: 768px) {
+          padding: $spacing-md $spacing-lg;
+        }
       }
 
       .mat-mdc-paginator-range-label {
         color: $text-secondary;
         font-weight: $font-weight-medium;
+
+        @media (max-width: 768px) {
+          font-size: $font-size-sm;
+        }
+      }
+
+      .mat-mdc-paginator-page-size-label,
+      .mat-mdc-paginator-range-actions {
+        @media (max-width: 768px) {
+          font-size: $font-size-sm;
+        }
       }
     }
   }
 
   // ==========================================
-  // ENHANCED SCHEMA PANEL STYLES
+  // SCHEMA PANEL STYLES
   // ==========================================
 
   .schema-panel {
@@ -2135,6 +2347,10 @@ $font-weight-bold: 700;
       .mat-expansion-panel-header {
         padding: $spacing-lg $spacing-2xl;
 
+        @media (max-width: 768px) {
+          padding: $spacing-md $spacing-lg;
+        }
+
         .mat-panel-title {
           @include flex-start;
           gap: $spacing-sm;
@@ -2143,6 +2359,10 @@ $font-weight-bold: 700;
           .panel-icon {
             color: $primary-blue;
             font-size: 20px;
+
+            @media (max-width: 768px) {
+              font-size: 18px;
+            }
           }
         }
 
@@ -2150,12 +2370,20 @@ $font-weight-bold: 700;
           color: $text-secondary;
           font-size: $font-size-sm;
           margin-left: auto;
+
+          @media (max-width: 768px) {
+            font-size: $font-size-xs;
+          }
         }
       }
 
       .mat-expansion-panel-content {
         .mat-expansion-panel-body {
           padding: $spacing-2xl;
+
+          @media (max-width: 768px) {
+            padding: $spacing-lg;
+          }
         }
       }
     }
@@ -2164,11 +2392,20 @@ $font-weight-bold: 700;
       .schema-info-header {
         margin-bottom: $spacing-2xl;
 
+        @media (max-width: 768px) {
+          margin-bottom: $spacing-lg;
+        }
+
         .schema-description {
           color: $text-secondary;
           font-size: $font-size-md;
           line-height: 1.5;
           margin: 0 0 $spacing-lg 0;
+
+          @media (max-width: 768px) {
+            font-size: $font-size-sm;
+            margin: 0 0 $spacing-md 0;
+          }
         }
 
         .schema-summary {
@@ -2176,15 +2413,28 @@ $font-weight-bold: 700;
           gap: $spacing-2xl;
           flex-wrap: wrap;
 
+          @media (max-width: 768px) {
+            gap: $spacing-lg;
+            flex-direction: column;
+          }
+
           .summary-item {
             @include flex-start;
             gap: $spacing-xs;
             color: $text-secondary;
             font-size: $font-size-sm;
 
+            @media (max-width: 768px) {
+              font-size: $font-size-xs;
+            }
+
             .mat-icon {
               font-size: 16px;
               color: $primary-blue;
+
+              @media (max-width: 768px) {
+                font-size: 14px;
+              }
             }
 
             strong {
@@ -2201,6 +2451,11 @@ $font-weight-bold: 700;
           font-size: $font-size-lg;
           font-weight: $font-weight-semibold;
           margin: 0 0 $spacing-lg 0;
+
+          @media (max-width: 768px) {
+            font-size: $font-size-md;
+            margin: 0 0 $spacing-md 0;
+          }
         }
 
         .field-grid {
@@ -2208,8 +2463,13 @@ $font-weight-bold: 700;
           grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
           gap: $spacing-lg;
 
+          @media (max-width: 1024px) {
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          }
+
           @media (max-width: 768px) {
             grid-template-columns: 1fr;
+            gap: $spacing-md;
           }
 
           .field-item {
@@ -2231,6 +2491,10 @@ $font-weight-bold: 700;
               @include smooth-transition(all);
               @include hover-lift;
 
+              @media (max-width: 768px) {
+                padding: $spacing-sm;
+              }
+
               &:hover {
                 border-color: $primary-blue;
                 box-shadow: $shadow-md;
@@ -2243,6 +2507,10 @@ $font-weight-bold: 700;
                 .field-icon {
                   font-size: 18px;
                   color: $primary-blue;
+
+                  @media (max-width: 768px) {
+                    font-size: 16px;
+                  }
                 }
 
                 .field-name {
@@ -2251,6 +2519,11 @@ $font-weight-bold: 700;
                   font-weight: $font-weight-semibold;
                   color: $text-primary;
                   @include text-truncate;
+
+                  @media (max-width: 768px) {
+                    font-size: $font-size-sm;
+                    margin: 0 $spacing-xs;
+                  }
                 }
 
                 .field-type-chip {
@@ -2260,6 +2533,11 @@ $font-weight-bold: 700;
                   border-radius: $radius-sm;
                   text-transform: uppercase;
                   letter-spacing: 0.5px;
+
+                  @media (max-width: 768px) {
+                    font-size: 9px;
+                    padding: $spacing-xs/2 $spacing-xs;
+                  }
 
                   // Type-specific chip colors
                   &.chip-string { background-color: rgba($primary-blue, 0.1); color: $primary-blue; }
@@ -2272,10 +2550,7 @@ $font-weight-bold: 700;
                 }
               }
 
-              // ==========================================
-              // NEW FIELD PATH INFORMATION
-              // ==========================================
-
+              // Field Path Information
               .field-path {
                 @include flex-start;
                 gap: $spacing-xs;
@@ -2287,11 +2562,19 @@ $font-weight-bold: 700;
                 .path-icon {
                   font-size: 14px;
                   color: $text-hint;
+
+                  @media (max-width: 768px) {
+                    font-size: 12px;
+                  }
                 }
 
                 .path-text {
                   font-size: $font-size-xs;
                   color: $text-hint;
+
+                  @media (max-width: 768px) {
+                    font-size: 9px;
+                  }
 
                   code {
                     background-color: rgba($gray-200, 0.8);
@@ -2299,6 +2582,11 @@ $font-weight-bold: 700;
                     border-radius: 2px;
                     font-family: 'Roboto Mono', monospace;
                     font-size: $font-size-xs;
+
+                    @media (max-width: 768px) {
+                      font-size: 9px;
+                      padding: 1px $spacing-xs/2;
+                    }
                   }
                 }
               }
@@ -2311,12 +2599,22 @@ $font-weight-bold: 700;
                   font-size: $font-size-sm;
                   color: $text-secondary;
                   margin-bottom: $spacing-xs;
+
+                  @media (max-width: 768px) {
+                    font-size: $font-size-xs;
+                  }
                 }
 
                 .field-properties {
                   @include flex-between;
                   gap: $spacing-sm;
                   flex-wrap: wrap;
+
+                  @media (max-width: 768px) {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: $spacing-xs;
+                  }
 
                   .field-sortable {
                     @include flex-start;
@@ -2325,14 +2623,26 @@ $font-weight-bold: 700;
                     color: $success-green;
                     font-weight: $font-weight-medium;
 
+                    @media (max-width: 768px) {
+                      font-size: 9px;
+                    }
+
                     .sortable-icon {
                       font-size: 14px;
+
+                      @media (max-width: 768px) {
+                        font-size: 12px;
+                      }
                     }
                   }
 
                   .field-width {
                     font-size: $font-size-xs;
                     color: $text-hint;
+
+                    @media (max-width: 768px) {
+                      font-size: 9px;
+                    }
                   }
 
                   .field-depth {
@@ -2342,17 +2652,22 @@ $font-weight-bold: 700;
                     color: $nested-purple;
                     font-weight: $font-weight-medium;
 
+                    @media (max-width: 768px) {
+                      font-size: 9px;
+                    }
+
                     .depth-icon {
                       font-size: 14px;
+
+                      @media (max-width: 768px) {
+                        font-size: 12px;
+                      }
                     }
                   }
                 }
               }
 
-              // ==========================================
-              // NEW NESTED COLUMNS PREVIEW
-              // ==========================================
-
+              // Nested Columns Preview
               .nested-columns-preview {
                 margin-bottom: $spacing-sm;
                 padding: $spacing-sm;
@@ -2360,11 +2675,19 @@ $font-weight-bold: 700;
                 border-radius: $radius-sm;
                 border: 1px solid rgba($nested-purple, 0.1);
 
+                @media (max-width: 768px) {
+                  padding: $spacing-xs;
+                }
+
                 h5 {
                   font-size: $font-size-sm;
                   font-weight: $font-weight-semibold;
                   color: $nested-purple;
                   margin: 0 0 $spacing-xs 0;
+
+                  @media (max-width: 768px) {
+                    font-size: $font-size-xs;
+                  }
                 }
 
                 .nested-chips {
@@ -2378,16 +2701,32 @@ $font-weight-bold: 700;
                     font-size: $font-size-xs;
                     height: 24px;
 
+                    @media (max-width: 768px) {
+                      height: 20px;
+                      font-size: 9px;
+                    }
+
                     ::ng-deep .mat-mdc-chip-label {
                       @include flex-start;
                       gap: 2px;
                       font-size: $font-size-xs;
                       padding: 0 $spacing-xs;
 
+                      @media (max-width: 768px) {
+                        font-size: 9px;
+                        padding: 0 $spacing-xs/2;
+                      }
+
                       .mat-icon {
                         font-size: 12px;
                         width: 12px;
                         height: 12px;
+
+                        @media (max-width: 768px) {
+                          font-size: 10px;
+                          width: 10px;
+                          height: 10px;
+                        }
                       }
                     }
                   }
@@ -2398,9 +2737,19 @@ $font-weight-bold: 700;
                     font-size: $font-size-xs;
                     height: 24px;
 
+                    @media (max-width: 768px) {
+                      height: 20px;
+                      font-size: 9px;
+                    }
+
                     ::ng-deep .mat-mdc-chip-label {
                       font-size: $font-size-xs;
                       padding: 0 $spacing-xs;
+
+                      @media (max-width: 768px) {
+                        font-size: 9px;
+                        padding: 0 $spacing-xs/2;
+                      }
                     }
                   }
                 }
@@ -2410,6 +2759,10 @@ $font-weight-bold: 700;
                 font-size: $font-size-xs;
                 color: $text-hint;
                 font-style: italic;
+
+                @media (max-width: 768px) {
+                  font-size: 9px;
+                }
               }
             }
           }
@@ -2424,16 +2777,28 @@ $font-weight-bold: 700;
         border-top: 1px solid $border-light;
         flex-wrap: wrap;
 
+        @media (max-width: 768px) {
+          margin-top: $spacing-lg;
+          padding-top: $spacing-md;
+          gap: $spacing-sm;
+          flex-direction: column;
+          align-items: stretch;
+        }
+
         button {
           @include flex-start;
           gap: $spacing-xs;
+
+          @media (max-width: 768px) {
+            font-size: $font-size-sm;
+          }
         }
       }
     }
   }
 
   // ==========================================
-  // ENHANCED FOOTER STYLES
+  // FOOTER STYLES
   // ==========================================
 
   .table-footer {
@@ -2443,9 +2808,14 @@ $font-weight-bold: 700;
     border-top: 1px solid $border-light;
     gap: $spacing-lg;
 
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
       flex-direction: column;
       align-items: stretch;
+      gap: $spacing-md;
+    }
+
+    @media (max-width: 768px) {
+      padding: $spacing-md $spacing-lg;
     }
 
     .footer-stats {
@@ -2453,8 +2823,14 @@ $font-weight-bold: 700;
       gap: $spacing-xl;
       flex-wrap: wrap;
 
-      @media (max-width: 768px) {
+      @media (max-width: 1024px) {
         justify-content: center;
+        gap: $spacing-md;
+      }
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        gap: $spacing-sm;
       }
 
       .stat-item {
@@ -2463,9 +2839,17 @@ $font-weight-bold: 700;
         font-size: $font-size-sm;
         color: $text-secondary;
 
+        @media (max-width: 768px) {
+          font-size: $font-size-xs;
+        }
+
         .stat-icon {
           font-size: 16px;
           color: $primary-blue;
+
+          @media (max-width: 768px) {
+            font-size: 14px;
+          }
         }
       }
     }
@@ -2473,6 +2857,10 @@ $font-weight-bold: 700;
     .footer-actions {
       @include flex-start;
       gap: $spacing-sm;
+
+      @media (max-width: 1024px) {
+        justify-content: center;
+      }
     }
   }
 }
@@ -2486,10 +2874,6 @@ $font-weight-bold: 700;
     .table-container {
       max-height: 60vh;
     }
-
-    .schema-panel .schema-content .schema-fields .field-grid {
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    }
   }
 }
 
@@ -2497,51 +2881,8 @@ $font-weight-bold: 700;
   .json-content-wrapper {
     border-radius: 0;
     
-    .table-controls {
-      padding: $spacing-lg;
-
-      .view-controls {
-        gap: $spacing-sm;
-      }
-    }
-
     .table-container {
       max-height: 50vh;
-
-      .data-table .table-header-row .header-cell,
-      .data-table .table-data-row .cell {
-        padding: $spacing-sm $spacing-xs;
-        font-size: $font-size-sm;
-      }
-
-      // Responsive nested content
-      .data-table .table-data-row .cell {
-        &.cell--nested {
-          .expanded-nested-content .nested-card {
-            ::ng-deep {
-              .mat-mdc-card-header,
-              .mat-mdc-card-content {
-                padding: $spacing-sm;
-              }
-            }
-          }
-        }
-
-        &.cell--array {
-          .expanded-array-content {
-            padding: $spacing-sm;
-            max-height: 150px;
-          }
-        }
-      }
-    }
-
-    .schema-panel ::ng-deep .mat-expansion-panel-content .mat-expansion-panel-body {
-      padding: $spacing-lg;
-    }
-
-    .table-footer {
-      padding: $spacing-lg;
     }
   }
 }
@@ -2549,15 +2890,15 @@ $font-weight-bold: 700;
 @media (max-width: 480px) {
   .json-content-wrapper {
     .table-controls {
+      .view-controls {
+        flex-direction: column;
+        gap: $spacing-sm;
+      }
+
       .controls-right {
         flex-direction: column;
         align-items: stretch;
         gap: $spacing-md;
-      }
-
-      .view-controls {
-        flex-direction: column;
-        gap: $spacing-sm;
       }
     }
 
@@ -2566,8 +2907,7 @@ $font-weight-bold: 700;
     }
 
     .table-footer .footer-stats {
-      flex-direction: column;
-      gap: $spacing-sm;
+      gap: $spacing-xs;
     }
   }
 }
@@ -2583,6 +2923,14 @@ button:focus,
   outline-offset: 2px;
 }
 
+// Focus within for form fields
+.search-input:focus-within,
+.array-mode-select:focus-within {
+  ::ng-deep .mat-mdc-form-field-outline {
+    border-color: $primary-blue !important;
+  }
+}
+
 // High contrast mode support
 @media (prefers-contrast: high) {
   .json-content-wrapper {
@@ -2590,6 +2938,13 @@ button:focus,
 
     .table-container .data-table .table-header-row .header-cell {
       border-bottom: 3px solid $primary-blue;
+    }
+
+    .array-item-chip,
+    .array-more-chip,
+    .nested-chip,
+    .nested-more-chip {
+      border: 1px solid currentColor;
     }
   }
 }
@@ -2627,5 +2982,32 @@ button:focus,
     .expanded-nested-content {
       display: none;
     }
+
+    // Print-friendly table styles
+    .data-table {
+      .table-header-row .header-cell {
+        background: $white !important;
+        border-bottom: 2px solid $text-primary;
+      }
+
+      .table-data-row {
+        page-break-inside: avoid;
+
+        &:nth-child(even) {
+          background-color: rgba($gray-100, 0.3);
+        }
+      }
+    }
+  }
+}
+
+// ==========================================
+// DARK MODE SUPPORT (Optional)
+// ==========================================
+
+@media (prefers-color-scheme: dark) {
+  .json-content-wrapper {
+    // You can add dark mode styles here if needed
+    // This is optional and can be implemented based on your design system
   }
 }
